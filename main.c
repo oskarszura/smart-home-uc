@@ -9,6 +9,9 @@ void loop() {
   float voltage = (sensorVal / 1024.0) * 5.0;
   float temperature = (voltage - .5) * 100;
   
-  Serial.println(temperature);
+  Serial.print("<");
+  Serial.print(temperature);
+  Serial.print(">");
+
   delay(1000);
 }
