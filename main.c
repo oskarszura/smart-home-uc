@@ -5,7 +5,7 @@ const int thermometerPin = A0;
 const int pirPin = 2;
 const int motionSpan = 3;
 int motionCounter = 0;
-int motionState = 0;
+unsigned long motionState = 0;
 
 void setup() {
   Serial.begin(9600);
