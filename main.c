@@ -7,9 +7,12 @@ const int motionSpan = 3;
 int motionCounter = 0;
 unsigned long motionState = 0;
 
+// gas variables
+const int gasPin = 4;
+
 void setup() {
   Serial.begin(9600);
-  pinMode(pirPin, INPUT); 
+  pinMode(pirPin, INPUT);
 }
 
 float getTemperature() {
@@ -27,7 +30,7 @@ int getMotion() {
     if(motionCounter == 0) {
       motionState = millis();
     }
-    
+
     motionCounter += 1;
   }
 
@@ -42,20 +45,27 @@ int getMotion() {
   return motionState;
 }
 
-void printDataPackage(float temperature, int motion) {
+int getGas() {
+  int isGas = digitalRead(gasPin);
+  return isGas;
+}
+
+void printDataPackage(float temperature, int motion, int gas) {
   Serial.print("<");
   Serial.print(temperature);
   Serial.print("|");
-  Serial.print(motion); 
-  Serial.print(">");  
+  Serial.print(motion);
+  Serial.print("|");
+  Serial.print(gas);
+  Serial.print(">");
 }
 
 void loop() {
   float temperature = getTemperature();
   int motion = getMotion();
-  
-  printDataPackage(temperature, motion);
+  int gas = getGas();
+
+  printDataPackage(temperature, motion, gas);
 
   delay(1000);
 }
-
