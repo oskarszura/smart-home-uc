@@ -10,6 +10,9 @@ unsigned long motionState = 0;
 // gas variables
 const int gasPin = 4;
 
+// piezzo variables
+const int piezzoPin = 7;
+
 void setup() {
   Serial.begin(9600);
   pinMode(pirPin, INPUT);
@@ -64,6 +67,10 @@ void loop() {
   float temperature = getTemperature();
   int motion = getMotion();
   int gas = getGas();
+
+  if (gas == LOW) {
+    tone(piezzoPin, 4000, 20);
+  }
 
   printDataPackage(temperature, motion, gas);
 
