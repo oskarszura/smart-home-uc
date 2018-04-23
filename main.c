@@ -72,7 +72,12 @@ void loop() {
     tone(piezzoPin, 4000, 20);
   }
 
-  printDataPackage(temperature, motion, gas);
+  if (Serial.available() >= 10) {
+    Serial.read();
+    tone(piezzoPin, 6000, 40);
+  } else {
+     printDataPackage(temperature, motion, gas); 
+  }
 
   delay(1000);
 }
