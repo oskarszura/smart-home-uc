@@ -1,3 +1,5 @@
+#include "music.h"
+
 // thermometer variables
 const int thermometerPin = A0;
 
@@ -15,7 +17,7 @@ const int piezzoPin = 7;
 
 void setup() {
   Serial.begin(9600);
-  pinMode(pirPin, INPUT);
+  pinMode(pirPin, INPUT); 
 }
 
 float getTemperature() {
@@ -33,7 +35,7 @@ int getMotion() {
     if(motionCounter == 0) {
       motionState = millis();
     }
-
+    
     motionCounter += 1;
   }
 
@@ -57,10 +59,10 @@ void printDataPackage(float temperature, int motion, int gas) {
   Serial.print("<");
   Serial.print(temperature);
   Serial.print("|");
-  Serial.print(motion);
+  Serial.print(motion); 
   Serial.print("|");
-  Serial.print(gas);
-  Serial.print(">");
+  Serial.print(gas); 
+  Serial.print(">");  
 }
 
 void loop() {
@@ -72,12 +74,22 @@ void loop() {
     tone(piezzoPin, 4000, 20);
   }
 
-  if (Serial.available() >= 10) {
-    Serial.read();
-    tone(piezzoPin, 6000, 40);
+  int incomingBytes = Serial.available();
+
+  if (incomingBytes >= 6) {
+    char cmd[6];
+    
+    for (int i = 0; i < incomingBytes; i++) {
+      cmd[i] = Serial.read(); 
+    }
+
+    if (strcmp(cmd, "CMD001") == 0) {
+      playMusic(piezzoPin);
+    }
   } else {
      printDataPackage(temperature, motion, gas); 
   }
 
   delay(1000);
 }
+
