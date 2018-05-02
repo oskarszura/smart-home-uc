@@ -1,4 +1,10 @@
+#include "utils.h"
 #include "music.h"
+
+#define TRANSMIT_INTERVAL 1000
+unsigned long currentTime;
+unsigned long lastTransmit = 0;
+unsigned long transmitInterval;
 
 // microphone variables
 const int micPin = A1;
@@ -7,12 +13,12 @@ const int micPin = A1;
 const int thermometerPin = A0;
 
 // motion variables
+bool isMotion = false;
 const int pirPin = 2;
-const int motionSpan = 3;
-int motionCounter = 0;
 unsigned long motionState = 0;
 
 // gas variables
+bool isGas = false;
 const int gasPin = 4;
 
 // piezzo variables
@@ -30,7 +36,7 @@ float getSound() {
 
 float getTemperature() {
   int sensorValue = analogRead(thermometerPin);
-  float voltage = (sensorValue / 1024.0) * 5.0;
+  float voltage = analogToVoltage(sensorValue);
   float temperature = (voltage - .5) * 100;
 
   return temperature;
@@ -38,24 +44,7 @@ float getTemperature() {
 
 int getMotion() {
   int isMotion = digitalRead(pirPin);
-
-  if (isMotion == HIGH || motionCounter > 0) {
-    if(motionCounter == 0) {
-      motionState = millis();
-    }
-    
-    motionCounter += 1;
-  }
-
-  if(motionCounter > 0) {
-    if(motionCounter > motionSpan) {
-      motionCounter = 0;
-    }
-  } else {
-    motionState = 0;
-  }
-
-  return motionState;
+  return isMotion;
 }
 
 int getGas() {
@@ -63,7 +52,19 @@ int getGas() {
   return isGas;
 }
 
-void printDataPackage(float temperature, int motion, int gas, float sound) {
+void handleIncomingMsg(int incomingBytes) {
+  char cmd[6];
+  
+  for (int i = 0; i < incomingBytes; i++) {
+    cmd[i] = Serial.read(); 
+  }
+  
+  if (strcmp(cmd, "CMD001") == 0) {
+    playMusic(piezzoPin);
+  }
+}
+
+void printDataPackage(float temperature, bool motion, bool gas, float sound) {
   Serial.print("<");
   Serial.print(temperature);
   Serial.print("|");
@@ -76,30 +77,36 @@ void printDataPackage(float temperature, int motion, int gas, float sound) {
 }
 
 void loop() {
+  currentTime = millis();
+  transmitInterval = currentTime - lastTransmit;
+  
   float sound = getSound();
   float temperature = getTemperature();
+  
   int motion = getMotion();
+
+  if (motion == HIGH) {
+    isMotion = true;
+  }
+  
   int gas = getGas();
 
   if (gas == LOW) {
-    tone(piezzoPin, 4000, 20);
+    riseAlert(piezzoPin);
+    isGas = true;
   }
 
   int incomingBytes = Serial.available();
 
   if (incomingBytes >= 6) {
-    char cmd[6];
-    
-    for (int i = 0; i < incomingBytes; i++) {
-      cmd[i] = Serial.read(); 
-    }
- 
-    if (strcmp(cmd, "CMD001") == 0) {
-      playMusic(piezzoPin);
-    }
-  } else {
-     printDataPackage(temperature, motion, gas, sound); 
-  }
+    handleIncomingMsg(incomingBytes);
+  } 
 
-  delay(1000);
+  if (transmitInterval >= 1000UL) {
+    lastTransmit = currentTime;
+    printDataPackage(temperature, isMotion, isGas, sound); 
+
+    isGas = false;
+    isMotion = false;
+  }
 }
