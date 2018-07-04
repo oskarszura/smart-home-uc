@@ -1,3 +1,4 @@
+#include <SoftwareSerial.h>
 #include "utils.h"
 #include "music.h"
 
@@ -7,6 +8,8 @@ unsigned long lastTransmit = 0;
 unsigned long transmitInterval;
 unsigned long lastSample = 0;
 unsigned long sampleInterval;
+
+SoftwareSerial softSerial(5, 6); // RX, TX
 
 // microphone variables
 int sampleMax = 0;
@@ -30,6 +33,8 @@ const int piezzoPin = 7;
 
 void setup() {
   Serial.begin(9600);
+  softSerial.begin(9600);
+
   pinMode(pirPin, INPUT); 
 }
 
@@ -70,15 +75,15 @@ void handleIncomingMsg(int incomingBytes) {
 }
 
 void printDataPackage(float temperature, bool motion, bool gas, float sound) {
-  Serial.print("<");
-  Serial.print(temperature);
-  Serial.print("|");
-  Serial.print(motion); 
-  Serial.print("|");
-  Serial.print(gas); 
-  Serial.print("|");
-  Serial.print(sound); 
-  Serial.print(">");  
+  softSerial.print("<");
+  softSerial.print(temperature);
+  softSerial.print("|");
+  softSerial.print(motion);
+  softSerial.print("|");
+  softSerial.print(gas);
+  softSerial.print("|");
+  softSerial.print(sound);
+  softSerial.print(">");
 }
 
 void loop() {
