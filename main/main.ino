@@ -62,20 +62,18 @@ int getGas() {
 }
 
 void handleIncomingMsg(int incomingBytes) {
-  char cmd[6];
-  
-  for (int i = 0; i < incomingBytes; i++) {
-    cmd[i] = Serial.read(); 
-  }
+  String cmd = softSerial.readString();
 
-  delay(500);
-  if (strcmp(cmd, "CMD001") == 0) {
+  if (cmd == "CMD001") {
     playMusic(piezzoPin);
+  }
+  else if (cmd == "CMDWHO") {
+    softSerial.print("[1:agent]");
   }
 }
 
 void printDataPackage(float temperature, bool motion, bool gas, float sound) {
-  softSerial.print("<");
+  softSerial.print("[2:<");
   softSerial.print(temperature);
   softSerial.print("|");
   softSerial.print(motion);
@@ -83,7 +81,7 @@ void printDataPackage(float temperature, bool motion, bool gas, float sound) {
   softSerial.print(gas);
   softSerial.print("|");
   softSerial.print(sound);
-  softSerial.print(">");
+  softSerial.print(">]");
 }
 
 void loop() {
@@ -121,7 +119,7 @@ void loop() {
     lastSample = currentTime;
   }
 
-  int incomingBytes = Serial.available();
+  int incomingBytes = softSerial.available();
 
   if (incomingBytes >= 6) {
     handleIncomingMsg(incomingBytes);
