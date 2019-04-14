@@ -70,6 +70,9 @@ void handleIncomingMsg(int incomingBytes) {
   else if (cmd == "CMDWHO") {
     softSerial.print("[1:agent]");
   }
+  else if (strcmp(cmd, "CMDDIS") == 0) {
+    softSerial.print("[0:disconnect]");
+  }  
 }
 
 void printDataPackage(float temperature, bool motion, bool gas, float sound) {
