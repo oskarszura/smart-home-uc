@@ -1,6 +1,7 @@
 #include <SoftwareSerial.h>
 #include "utils.h"
 #include "music.h"
+#include "version.h"
 
 #define TRANSMIT_INTERVAL 1000
 unsigned long currentTime;
@@ -68,7 +69,7 @@ void handleIncomingMsg(int incomingBytes) {
     playMusic(piezzoPin);
   }
   else if (cmd == "CMDWHO") {
-    softSerial.print("[1:agent]");
+    softSerial.print("[1:agent-" + String(VERSION) + "]");
   }
   else if (strcmp(cmd, "CMDDIS") == 0) {
     softSerial.print("[0:disconnect]");
