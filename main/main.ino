@@ -1,7 +1,7 @@
-#include <SoftwareSerial.h>
-#include "utils.h"
 #include "music.h"
+#include "utils.h"
 #include "version.h"
+#include <SoftwareSerial.h>
 
 #define TRANSMIT_INTERVAL 1000
 unsigned long currentTime;
@@ -36,7 +36,7 @@ void setup() {
   Serial.begin(9600);
   softSerial.begin(9600);
 
-  pinMode(pirPin, INPUT); 
+  pinMode(pirPin, INPUT);
 }
 
 float getSound() {
@@ -67,13 +67,11 @@ void handleIncomingMsg(int incomingBytes) {
 
   if (cmd == "CMD001") {
     playMusic(piezzoPin);
-  }
-  else if (cmd == "CMDWHO") {
+  } else if (cmd == "CMDWHO") {
     softSerial.print("[1:agent-" + String(VERSION) + "]");
-  }
-  else if (strcmp(cmd, "CMDDIS") == 0) {
+  } else if (strcmp(cmd, "CMDDIS") == 0) {
     softSerial.print("[0:disconnect]");
-  }  
+  }
 }
 
 void printDataPackage(float temperature, bool motion, bool gas, float sound) {
@@ -92,16 +90,16 @@ void loop() {
   currentTime = millis();
   transmitInterval = currentTime - lastTransmit;
   sampleInterval = currentTime - lastSample;
-  
+
   float sound = getSound();
   float temperature = getTemperature();
-  
+
   int motion = getMotion();
 
   if (motion == HIGH) {
     isMotion = true;
   }
-  
+
   int gas = getGas();
 
   if (gas == LOW) {
@@ -109,17 +107,15 @@ void loop() {
     isGas = true;
   }
 
-  if (sampleInterval <= 250UL)
-  {
-    if (sound > sampleMax)
-    {
+  if (sampleInterval <= 250UL) {
+    if (sound > sampleMax) {
       sampleMax = sound;
-    } 
-    else if (sound < sampleMax) {
+    } else if (sound < sampleMax) {
       sampleMin = sound;
     }
-  } else { 
-    sampleDb = 20 * log10(analogToVoltage(sampleMax) / analogToVoltage(sampleMin));
+  } else {
+    sampleDb =
+        20 * log10(analogToVoltage(sampleMax) / analogToVoltage(sampleMin));
     lastSample = currentTime;
   }
 
@@ -127,11 +123,11 @@ void loop() {
 
   if (incomingBytes >= 6) {
     handleIncomingMsg(incomingBytes);
-  } 
+  }
 
   if (transmitInterval >= 1000UL) {
     lastTransmit = currentTime;
-    printDataPackage(temperature, isMotion, isGas, sampleDb); 
+    printDataPackage(temperature, isMotion, isGas, sampleDb);
 
     isGas = false;
     isMotion = false;
