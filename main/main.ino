@@ -68,8 +68,8 @@ void handleIncomingMsg(int incomingBytes) {
   if (cmd == "CMD001") {
     playMusic(piezzoPin);
   } else if (cmd == "CMDWHO") {
-    softSerial.print("[1:agent-" + String(VERSION) + "]");
-  } else if (strcmp(cmd, "CMDDIS") == 0) {
+    softSerial.print("[1:type1-" + String(VERSION) + "]");
+  } else if (cmd == "CMDDIS") {
     softSerial.print("[0:disconnect]");
   }
 }
